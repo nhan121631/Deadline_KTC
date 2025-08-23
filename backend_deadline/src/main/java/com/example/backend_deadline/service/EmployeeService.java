@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.backend_deadline.dtos.EmployeeCreateRequestDto;
 import com.example.backend_deadline.dtos.EmployeeResponseDto;
 import com.example.backend_deadline.dtos.EmployeeUpdateRequestDto;
+import com.example.backend_deadline.dtos.Paging;
 import com.example.backend_deadline.entites.Employee;
 import com.example.backend_deadline.repositories.EmployeeJpaRepository;
 
@@ -59,11 +62,20 @@ public class EmployeeService {
         return convertToDto(employee);
     }
 
-    public List<EmployeeResponseDto> getAllEmployees() {
-        List<Employee> employees = employeeRepository.findAll();
-        return employees.stream()
+    public Paging<EmployeeResponseDto> getAllEmployees(int page, int size) {
+        Page<Employee> employeePage = employeeRepository.findAll(PageRequest.of(page, size));
+        List<EmployeeResponseDto> content = employeePage.getContent().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+        return Paging.<EmployeeResponseDto>builder()
+                .data(content)
+                .pageNumber(employeePage.getNumber())
+                .pageSize(employeePage.getSize())
+                .totalRecords(employeePage.getTotalElements())
+                .totalPages(employeePage.getTotalPages())
+                .hasNext(employeePage.hasNext())
+                .hasPrevious(employeePage.hasPrevious())
+                .build();
     }
 
     public EmployeeResponseDto getEmployeeById(Long id) {
@@ -80,7 +92,9 @@ public class EmployeeService {
         employee.setPhoneNumber(requestDto.getPhoneNumber());
         employee.setDateOfBirth(requestDto.getDateOfBirth());
         employee.setGender(requestDto.getGender());
-        employee.setHashedPassword(passwordEncoder.encode(requestDto.getPassword()));
+        if (requestDto.getPassword() != null) {
+            employee.setHashedPassword(passwordEncoder.encode(requestDto.getPassword()));
+        }
 
         employee = employeeRepository.save(employee);
         return convertToDto(employee);
