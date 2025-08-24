@@ -116,7 +116,7 @@ const TableComponent: React.FC = () => {
   };
 
   const handleDeleteEmployee = (id: number) => {
-    deleteEmployee.mutate(id);s
+    deleteEmployee.mutate(id);
   };
   const handleCancel = () => {
     setSelectedRecord(null);
