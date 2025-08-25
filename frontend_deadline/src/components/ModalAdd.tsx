@@ -25,15 +25,10 @@ export function ModalAdd({ isModalAdd, setIsModalAdd }) {
     },
   });
   const handleAddOk = () => {
-    console.log("Form Values:", form.getFieldsValue());
-    addMutation.mutate({
-      fullName: form.getFieldValue("fullName"),
-      email: form.getFieldValue("email"),
-      dateOfBirth: form.getFieldValue("dateOfBirth"),
-      gender: form.getFieldValue("gender"),
-      phoneNumber: form.getFieldValue("phoneNumber"),
-      password: form.getFieldValue("password"),
-    } as CreateEmployee);
+    form.validateFields().then((values) => {
+      console.log("Form Values:", values);
+      addMutation.mutate(values as CreateEmployee);
+    });
   };
 
   const handleAddCancel = () => {

@@ -48,7 +48,6 @@ public class EmployeeService {
         if (!isEmailUnique(createRequestDto.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-
         Employee employee = Employee.builder()
                 .fullName(createRequestDto.getFullName())
                 .email(createRequestDto.getEmail())

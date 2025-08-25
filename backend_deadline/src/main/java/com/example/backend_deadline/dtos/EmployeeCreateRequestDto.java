@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import com.example.backend_deadline.enums.Gender;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 public class EmployeeCreateRequestDto {
     @Length(min = 4, message = "Full name must be at least 4 characters long")
     @Length(max = 160, message = "Full name must be at most 160 characters long")
+    @NotBlank(message = "Full name is required")
     private String fullName;
     @Email(message = "Email should be valid")
     private String email;
