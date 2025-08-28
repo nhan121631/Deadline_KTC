@@ -31,7 +31,10 @@ const TableComponent: React.FC = () => {
   });
 
   const { data, isLoading } = useQuery(
-    getPaginatedEmployeesQueryOptions(pagination.page, pagination.pageSize)
+    getPaginatedEmployeesQueryOptions({
+      page: pagination.page,
+      size: pagination.pageSize,
+    })
   );
   console.log("data:", data);
   const employeesData = data?.data || [];
@@ -104,7 +107,9 @@ const TableComponent: React.FC = () => {
         data: {
           fullName: form.getFieldValue("fullname"),
           // email: form.getFieldValue("email"),
-          dateOfBirth: form.getFieldValue("dateOfBirth"),
+          dateOfBirth: form.getFieldValue("dateOfBirth")
+            ? form.getFieldValue("dateOfBirth").format("YYYY-MM-DD")
+            : undefined,
           phoneNumber: form.getFieldValue("phoneNumber"),
           gender: form.getFieldValue("gender"),
           // password: form.getFieldValue("password"),

@@ -35,14 +35,19 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, length = 160)
     private String fullName;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 100)
     private String email;
+    @Column(nullable = false, length = 15)
     private String phoneNumber;
+    @Column(nullable = false)
     private LocalDate dateOfBirth;
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @Column(columnDefinition = "boolean default true", nullable = false)
     private boolean active;
+    @Column(nullable = false, length = 255)
     private String hashedPassword;
     @CreatedDate
     private LocalDateTime createdDate;

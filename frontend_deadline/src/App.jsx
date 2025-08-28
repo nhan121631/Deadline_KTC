@@ -4,6 +4,7 @@ import TableComponent from './components/Table'
 import { Button } from 'antd';
 import { useState } from 'react';
 import { ModalAdd } from './components/ModalAdd';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 
 const queryClient = new QueryClient();
@@ -28,6 +29,8 @@ const handleIsOpenAdd = () => {
         </Button>
         <TableComponent />
       </div>
+               <ReactQueryDevtools initialIsOpen={true} />
+
     </QueryClientProvider>
   )
 }

@@ -3,8 +3,12 @@ import apiClient from "../lib/api-client-ad";
 import type { MutationConfig } from "../lib/react-query";
 
 import { CreateEmployee, Employee, Paging, UpdateEmployee } from "../type/type";
+type Params = {
+  page: number;
+  size: number;
+};
 
-export const getAllEmployees = ({ page, size }: { page: number; size: number }): Promise<Paging<Employee>> => {
+export const getAllEmployees = ({ page, size }: Params): Promise<Paging<Employee>> => {
   return apiClient.get(`/employees`, {
     params: {
       page,
@@ -13,7 +17,7 @@ export const getAllEmployees = ({ page, size }: { page: number; size: number }):
   });
 };
 
-  export const getPaginatedEmployeesQueryOptions = (page: number, size: number) => {
+export const getPaginatedEmployeesQueryOptions = ({ page, size }: Params) => {
   return queryOptions({
     queryKey: ['getPaginatedEmployees', page, size] as const,
     queryFn: () => getAllEmployees({ page, size }),
@@ -35,11 +39,30 @@ export const useUpdateEmployee = ({ mutationConfig }: UseUpdateEmployeeOptions =
   const { onSuccess, ...restConfig } = mutationConfig || {};
 
   return useMutation({
-    onSuccess: (data, ...args) => {
-      queryClient.invalidateQueries({
-        queryKey: ['getPaginatedEmployees']
+    onSuccess: (data, variables, ...args) => {
+      // Cập nhật cache trực tiếp, không fetch lại
+      // Lấy tất cả các cache page/size hiện có và cập nhật từng cái
+      const queryCache = queryClient.getQueryCache().findAll({ queryKey: ['getPaginatedEmployees'] });
+      queryCache.forEach(({ queryKey }) => {
+        queryClient.setQueryData<Paging<Employee> | undefined>(
+          queryKey,
+          (oldData) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              data: oldData.data?.map((emp) =>
+                emp.id === variables.id
+                  ? {
+                      ...emp,
+                      ...variables.data 
+                    }
+                  : emp
+              )
+            };
+          }
+        );
       });
-      onSuccess?.(data, ...args);
+      onSuccess?.(data, variables, ...args);
     },
     ...restConfig,
     mutationFn: updateEmployee,
@@ -85,13 +108,23 @@ export const useDeleteEmployee = ({ mutationConfig }: UseDeleteEmployeeOptions =
   const { onSuccess, ...restConfig } = mutationConfig || {};
 
   return useMutation({
-    onSuccess: (data, ...args) => {
-      queryClient.invalidateQueries({
-        queryKey: ['getPaginatedEmployees']
+    onSuccess: (data, id, ...args) => {
+      const queryCache = queryClient.getQueryCache().findAll({ queryKey: ['getPaginatedEmployees'] });
+      queryCache.forEach(({ queryKey }) => {
+        queryClient.setQueryData<Paging<Employee> | undefined>(
+          queryKey,
+          (oldData) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              data: oldData.data?.filter((emp) => emp.id !== id)
+            };
+          }
+        );
       });
-      onSuccess?.(data, ...args);
+      onSuccess?.(data, id, ...args);
     },
     ...restConfig,
-    mutationFn: deleteEmployee,
+    mutationFn: deleteEmployee, 
   });
 };
